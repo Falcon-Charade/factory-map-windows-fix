@@ -1,0 +1,12 @@
+{
+  "name": "factory-map",
+  "version": "0.4.2",
+  "title": "Factory Map",
+  "author": "Veekaste",
+  "description": "Exports the explored map, player and train positions, production, research, pollution, power and events to script-output, for a live server website (map, timelapse and stats). Server-side files only; no gameplay changes. Works with vanilla, Space Age and Space Exploration.",
+  "factorio_version": "2.1",
+  "dependencies": [
+    "base >= 2.1.0",
+    "? space-exploration"
+  ]
+}

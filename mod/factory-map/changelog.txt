@@ -1,0 +1,111 @@
+---------------------------------------------------------------------------------------------------
+Version: 0.4.2
+Date: 2026-11-16
+  Changes:
+    - First release on the mod portal. No changes to how the mod works.
+    - Removed a leftover build file from the package and added a thumbnail.
+---------------------------------------------------------------------------------------------------
+Version: 0.4.1
+Date: 2026-11-14
+  Changes:
+    - In-game messages use the mod's display name "Factory Map".
+---------------------------------------------------------------------------------------------------
+Version: 0.4.0
+Date: 2026-11-14
+  Features:
+    - Live map: the website map now keeps itself up to date while people play, a little at a time, instead of
+      capturing the whole map every few hours. Building, mining, landfill and destroyed buildings show up
+      within a minute or two; a slow background check catches ore running down, trees and biters spreading.
+    - /map-refresh re-reads the whole map at once (/map-snapshot still works and does the same).
+    - Power: the main network's generating capacity (steady and solar) for the website.
+  Changes:
+    - No more short freeze when a snapshot started: explored chunks are tracked as they get explored.
+    - Settings: "snapshot interval" is replaced by "re-check everything every (minutes)".
+    - Building counts come straight from the game (exact, and no longer wait for a snapshot).
+    - Trains and vehicles are no longer drawn into the map picture (they move; the website shows them live).
+---------------------------------------------------------------------------------------------------
+Version: 0.3.1
+Date: 2026-11-14
+  Bugfixes:
+    - /map-bench no longer stops with an error before timing the chunk scan.
+---------------------------------------------------------------------------------------------------
+Version: 0.3.0
+Date: 2026-11-13
+  Features:
+    - Admin settings: turn off showing chat, player positions or enemy attacks on the website.
+    - Enemies from any mod: any force at war with the players counts, and nests/worms are recognised by type,
+      so renamed or new enemy buildings show up on the map.
+    - Space Age: demolisher territories on the map, evolution per planet, Gleba spores kept apart from
+      pollution, and where each space platform is (at a planet or travelling between two).
+  Changes:
+    - The kill counter on the website counts enemies by type instead of by name.
+---------------------------------------------------------------------------------------------------
+Version: 0.2.0
+Date: 2026-11-13
+  Changes:
+    - Renamed from factory101-map to Factory Map (factory-map). Output now goes to script-output/factory-map/.
+---------------------------------------------------------------------------------------------------
+Version: 0.1.10
+Date: 2026-11-13
+  Bugfixes:
+    - /map-bench no longer crashes the server on a new map with nothing charted near the centre.
+    - Space Age planets and space platforms are recognised when Space Exploration isn't installed.
+    - The pollution map skips surfaces that can't have pollution, and stops if pollution is turned off.
+    - Crash guard: an error inside the mod is logged and ignored instead of stopping the server.
+---------------------------------------------------------------------------------------------------
+Version: 0.1.9
+Date: 2026-11-13
+  Features:
+    - Live positions of cars, tanks and spidertrons (tracked by build events, no searching).
+    - Map snapshots record turret ranges and roboport coverage for the website's defence/robot layers.
+---------------------------------------------------------------------------------------------------
+Version: 0.1.8
+Date: 2026-11-13
+  Features:
+    - Pollution: sources/absorbers totals and a pollution cloud map (read a few chunks per tick every 5 minutes).
+    - Power: production/consumption of the main electric network and a low-power check.
+    - Research: cost of the current technology (for an ETA on the website).
+    - Player counters: buildings placed, mined, items crafted, enemies killed, distance walked/driven.
+---------------------------------------------------------------------------------------------------
+Version: 0.1.7
+Date: 2026-11-13
+  Features:
+    - Exports what drives biter evolution (time, pollution, destroyed nests), the map's evolution settings and which enemies spawners produce at each evolution level.
+---------------------------------------------------------------------------------------------------
+Version: 0.1.6
+Date: 2026-11-13
+  Bugfixes:
+    - The player who leaves last no longer stays on the website map while the server is paused.
+---------------------------------------------------------------------------------------------------
+Version: 0.1.5
+Date: 2026-11-13
+  Optimizations:
+    - Removed the 10-minute building count (caused a ~0.5 s freeze on big maps); buildings are now counted during the map snapshot.
+    - Map snapshot reads terrain about twice as fast.
+    - Research totals are cached instead of re-counted every minute.
+---------------------------------------------------------------------------------------------------
+Version: 0.1.4
+Date: 2026-11-13
+  Features:
+    - Resource amounts in map snapshots (ore patch info on the website).
+    - Biter attack alerts: destroyed buildings are reported with their location.
+---------------------------------------------------------------------------------------------------
+Version: 0.1.3
+Date: 2026-11-13
+  Changes:
+    - Export live/stats data on startup, when players join or leave, and via /map-export, so the website is up to date while the server is paused.
+---------------------------------------------------------------------------------------------------
+Version: 0.1.2
+Date: 2026-11-13
+  Features:
+    - Export map tags (pins) and train station names for the website map.
+---------------------------------------------------------------------------------------------------
+Version: 0.1.1
+Date: 2026-11-13
+  Bugfixes:
+    - Map snapshots lost all buildings and ores in busy chunks (large lists were exported as JSON objects).
+---------------------------------------------------------------------------------------------------
+Version: 0.1.0
+Date: 2026-11-13
+  Features:
+    - Initial release: map snapshots, live player/train positions, stats and event export.

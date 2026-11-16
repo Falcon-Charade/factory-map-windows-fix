@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{SERVER}} · Factorio server</title>
+<meta name="description" content="Live map, timelapse, production stats and event log for the {{SERVER}} Factorio server.">
+<link rel="manifest" href="/static/manifest.webmanifest">
+<meta name="theme-color" content="#2b2a2b">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icon-192.png">
+<link rel="apple-touch-icon" href="/static/icon-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="{{SERVER}}">
+<link rel="stylesheet" href="/static/vendor/leaflet.css">
+<link rel="stylesheet" href="/static/css/app.css?v={{V}}">
+</head>
+<body>
+<header>
+  <div class="brand">{{SERVER}}{{TAGLINE}}</div>
+  <span class="pill" id="status"><span class="dot"></span>loading…</span>
+  <span class="hstats" id="hstats"></span>
+  <span id="alert" title="Show on map">⚠ <span id="alertText"></span></span>
+  <nav>
+    <button data-view="map">Map</button>
+    <button data-view="factory">Factory</button>
+    <button data-view="events">Events</button>
+    <button data-view="players">Players</button>
+  </nav>
+</header>
+<main>
+  <section class="view" id="v-map">
+    <div class="mapwrap">
+      <div id="map"></div>
+      <button class="ctlbtn" id="ctlbtn">☰ Layers</button>
+      <div class="mapctl bevel" id="mapctl">
+        <div class="lysec">
+          <h2 class="lyh">Map</h2>
+          <div class="search"><input id="mapSearch" type="search" placeholder="Find a tag, station or ore…" autocomplete="off" aria-label="Search the map"><div class="sres" id="sres" hidden></div></div>
+          <div><select id="surface" aria-label="Surface"></select></div>
+        </div>
+        <div class="lysec">
+          <h2 class="lyh">Layers</h2>
+          <div class="layers">
+            <label><input type="checkbox" id="lyTags" checked> <i class="g-tag" style="transform:rotate(-45deg)"></i>Tags</label>
+            <label><input type="checkbox" id="lyPlayers" checked> <i class="g-pl"></i>Players<span class="muted small" id="posOff" hidden> (not shared)</span></label>
+            <label><input type="checkbox" id="lyPatches" checked> <i class="g-ore"></i>Ores</label>
+            <label><input type="checkbox" id="lyAttacks" checked> <i class="g-atk"></i>Attacks</label>
+            <button class="lybtn" id="oreChoose">⛏ Choose ores &amp; find patches…</button>
+          </div>
+        </div>
+        <div class="lysec">
+          <h2 class="lyh">More layers</h2>
+          <div class="layers">
+            <label><input type="checkbox" id="lyTrains"> <i class="g-train"></i>Trains</label>
+            <label><input type="checkbox" id="lyStations"> <i class="g-st"></i>Stations</label>
+            <label><input type="checkbox" id="lyNests"> <i class="g-nest"></i>Enemy bases</label>
+            <label><input type="checkbox" id="lyPol"> <i class="g-pol"></i>Pollution</label>
+            <label><input type="checkbox" id="lyDef"> <i class="g-def"></i>Defences</label>
+            <label><input type="checkbox" id="lyVeh"> <i class="g-veh"></i>Vehicles</label>
+            <label><input type="checkbox" id="lyKey"> <i class="g-key">★</i>Key buildings</label>
+            <label><input type="checkbox" id="lyDead"> <i class="g-dead" style="font-size:9px;line-height:12px;width:14px;height:14px">☠</i>Death markers</label>
+            <label><input type="checkbox" id="lyHist"> <i class="g-hist"></i>Attack history</label>
+            <label><input type="checkbox" id="lyRobo"> <i class="g-robo"></i>Robot coverage</label>
+            <label id="lyChgL" hidden><input type="checkbox" id="lyChg"> <i class="g-chg"></i>New builds</label>
+          </div>
+        </div>
+        <details class="lysec mapkey"><summary class="lyh">Map colours</summary><div class="keygrid">
+          <span><i style="background:#c9a43c"></i>Belts</span><span><i style="background:#3a6ea5"></i>Pipes</span>
+          <span><i style="background:#8e9aa3"></i>Rails</span><span><i style="background:#a5a5a5"></i>Power poles</span>
+          <span><i style="background:#c4cccc"></i>Walls</span><span><i style="background:#4f86b0"></i>Buildings</span>
+          <span><i style="background:#d22b2b"></i>Enemy nests</span>
+          <span><i style="background:#e040fb"></i>Core seams</span><span><i style="background:#2c4a22"></i>Trees</span>
+          <span><i style="background:#0b0b0b;border-color:#555"></i>Unexplored</span><span class="muted small" style="grid-column:1/-1">Ores use their in-game map colour; buildings use theirs when the game defines one.</span>
+        </div></details>
+        <div class="lysec" id="tlBox" hidden>
+          <h2 class="lyh">Timelapse <span class="sub" id="snapLabel"></span></h2>
+          <div class="tl"><button id="play" title="Play timelapse">▶</button><input type="range" id="snap" min="0" max="0" value="0" aria-label="Snapshot"></div>
+        </div>
+        <div class="lysec" id="pBox" hidden><h2 class="lyh">Online</h2><div class="plist" id="plist"></div></div>
+        <div class="lysec">
+          <h2 class="lyh">Picture</h2>
+          <button class="lybtn shotbtn" id="shotBtn" title="Download a PNG of what the map shows right now, with your layers"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 3v11m-4.5-4.5L12 14l4.5-4.5M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>Save this view as a picture</button>
+        </div>
+      </div>
+      <div class="mapfoot inset"><span id="snapAge"></span><span class="coords" id="coords"></span></div>
+      <div class="tip inset" id="tip">Click anything on the map for details</div>
+    </div>
+  </section>
+
+  <section class="view" id="v-factory"><div class="wrap"><div class="grid" id="factory"></div></div></section>
+
+  <section class="view" id="v-events"><div class="wrap">
+    <div class="toolbar chips" id="evFilter">
+      <button data-t="" class="active">All</button><button data-t="chat">Chat</button><button data-t="death">Deaths</button>
+      <button data-t="research">Research</button><button data-t="first">Firsts</button><button data-t="join,leave">Joins</button>
+      <button data-t="attack">Attacks</button><button data-t="rocket,cargo_rocket">Rockets</button><button data-t="surface,snapshot">World</button>
+    </div>
+    <div class="bevel"><ul class="feed" id="feed"></ul></div>
+    <button class="more" id="more">Load older</button>
+  </div></section>
+
+  <section class="view" id="v-players"><div class="wrap"><div class="grid" id="players"></div></div></section>
+</main>
+
+<script src="/static/vendor/leaflet.js"></script>
+<script src="/static/vendor/chart.umd.min.js"></script>
+<script src="/static/vendor/html-to-image.js"></script>
+<script>const FOOT={{FOOTER_JSON}};  // filled in by the server: copyright, GitHub link, mod version</script>
+<script src="/static/js/core.js?v={{V}}"></script>
+<script src="/static/js/map.js?v={{V}}"></script>
+<script src="/static/js/ores.js?v={{V}}"></script>
+<script src="/static/js/factory.js?v={{V}}"></script>
+<script src="/static/js/events.js?v={{V}}"></script>
+<script src="/static/js/players.js?v={{V}}"></script>
+<script src="/static/js/boot.js?v={{V}}"></script>
+</body>
+</html>

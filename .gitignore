@@ -1,0 +1,8 @@
+web/state/
+web/cache/
+web/site.json
+.venv/
+__pycache__/
+*.pyc
+build/
+dist/
