@@ -1,9 +1,9 @@
 {
   "name": "factory-map",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "title": "Factory Map",
   "author": "Veekaste",
-  "description": "Exports the explored map, player and train positions, production, research, pollution, power and events to script-output, for a live server website (map, timelapse and stats). Server-side files only; no gameplay changes. Works with vanilla, Space Age and Space Exploration.",
+  "description": "A live website for your Factorio server: zoomable map, timelapse, production and power stats, event log and leaderboards. The mod writes the data to script-output; the companion website shows it. No gameplay changes. Tested with Space Exploration + Krastorio 2.",
   "factorio_version": "2.1",
   "dependencies": [
     "base >= 2.1.0",

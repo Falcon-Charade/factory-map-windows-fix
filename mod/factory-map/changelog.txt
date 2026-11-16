@@ -1,8 +1,13 @@
 ---------------------------------------------------------------------------------------------------
-Version: 0.4.2
+Version: 0.4.3
 Date: 2026-11-16
   Changes:
     - First release on the mod portal. No changes to how the mod works.
+    - New thumbnail: the live map with a map pin.
+---------------------------------------------------------------------------------------------------
+Version: 0.4.2
+Date: 2026-11-16
+  Changes:
     - Removed a leftover build file from the package and added a thumbnail.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.1
