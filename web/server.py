@@ -22,7 +22,11 @@ This file only starts things. The code lives in the webapp/ package:
 
 Run:  python3 server.py   (or the factory-map-web systemd user service)
 """
+import os
+import socket
+import sys
 import threading
+import webbrowser
 from http.server import ThreadingHTTPServer
 
 from webapp import gamenames
@@ -32,11 +36,33 @@ from webapp.ingest import ingest_loop
 from webapp.lookup import migrate_lookups
 from webapp.store import db, db_lock
 
+def lan_ip():
+    """This computer's address on the home network (no traffic is sent)."""
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sk:
+            sk.connect(("192.0.2.1", 9))
+            return sk.getsockname()[0]
+    except OSError:
+        return None
+
+
 if __name__ == "__main__":
     with db_lock:
         db().close()  # creates or upgrades the tables before anything else touches them
     log(f"names loaded: {sum(len(v) for v in gamenames.NAMES.d.values())}; reading {OUT}")
+    if not OUT.is_dir():
+        log("No map data yet. Install the Factory Map mod, then host a game (Multiplayer > Host) or start your server;"
+            " the site fills in while someone plays. Wrong folder? Set \"factorio_data\" in site.json.")
+    try:
+        httpd = ThreadingHTTPServer((BIND, PORT), Handler)
+    except OSError as e:
+        sys.exit(f"Can't use port {PORT} ({e.strerror}). Is the website already running? Otherwise set \"port\" in site.json.")
     threading.Thread(target=ingest_loop, daemon=True).start()
     migrate_lookups()
-    log(f"{SERVER_NAME} web on http://{BIND}:{PORT}")
-    ThreadingHTTPServer((BIND, PORT), Handler).serve_forever()
+    url = f"http://127.0.0.1:{PORT}"
+    log(f"{SERVER_NAME} website: open {url} (keep this window open)")
+    if BIND in ("0.0.0.0", "") and lan_ip():
+        log(f"Other devices on your network: http://{lan_ip()}:{PORT}")
+    if os.environ.get("OPEN_BROWSER") == "1":
+        threading.Timer(1.5, webbrowser.open, (url,)).start()
+    httpd.serve_forever()

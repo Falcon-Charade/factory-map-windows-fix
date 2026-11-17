@@ -9,4 +9,4 @@ Unchanged copies in `web/static/vendor/`:
 | [html-to-image](https://github.com/bubkoo/html-to-image) | – | MIT |
 
 Factorio and its game data belong to Wube Software. This repository contains no game files;
-`tools/copy_locale.py` copies the English names from your own installation.
+the website copies the English names from your own installation.

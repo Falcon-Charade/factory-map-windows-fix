@@ -26,89 +26,81 @@
 
 - **Factorio 2.1.** Tested with **Space Exploration + Krastorio 2** (150+ mods, 13,000+ chunks).
 - Vanilla and Space Age are untested but should work (standard API only; the site knows Space Age planets and platforms).
-- Website: Python 3.10+ on Linux, Windows or macOS.
+- Website: Windows, macOS or Linux with Python 3.10+. Tested on fresh Ubuntu 24.04, Debian 12 and Fedora 41; Windows and macOS not yet tested by a person.
 - **Lightweight.** In game it only re-reads the spots where something changed (well under 1 ms) plus a slow background pass, so UPS isn't affected: the 150-mod test save stays at 60 UPS. The website needs about 400 MB of RAM for a big map and a few seconds of CPU per minute while the factory changes, so any PC or small home server can run it.
 
-## 1. Install the mod (server and every player)
+## Quick start (5 minutes)
 
-Every player needs the same mod version as the server. Get **Factory Map** from the in-game mod manager (players can use *Sync mods with server*), or by hand: run `./build.sh` (Linux/macOS) and put `dist/factory-map_<version>.zip` in the `mods` folder of the user data folder below. Without bash, copy the `mod/factory-map` folder into `mods` instead.
+1. **Install the mod.** In Factorio: *Mods → Install → search "Factory Map"*. Your friends get it automatically with *Sync mods with server* when they join.
+2. **Get the website.** On this page: green **Code** button → **Download ZIP**, then unzip it anywhere (e.g. your Desktop).
+3. **Install Python** if you don't have it: [python.org/downloads](https://www.python.org/downloads/) (Windows and macOS). Linux usually has it already.
+4. **Start it** by double-clicking:
+   - **Windows:** `start-windows.bat`
+   - **macOS:** `start-mac.command` (the first time: right-click → *Open* → *Open*)
+   - **Linux:** run `./start-mac-linux.sh` in a terminal
 
-The mod only writes files on the machine that hosts the game, and **not in singleplayer**: use *Multiplayer → Host* (you can host just for yourself).
+   The first start sets things up (about a minute). Then your browser opens **http://127.0.0.1:8480**. Keep the window open; closing it stops the website.
+5. **Play.** Host the game with *Multiplayer → Host* (you can host just for yourself; singleplayer doesn't write any data), or start your server. The map appears after the mod has read the whole map once: a few minutes on a big map.
 
-## 2. Run the website on the hosting machine
+The website finds the Factorio folders by itself (Steam or standalone). Everything is read-only: nothing on the site can change your game.
 
-Folders you need:
-
-| | User data folder (`FACTORIO_DATA`: has `mods/`, `script-output/`) | Install folder (for item names) |
-|---|---|---|
-| **Windows** | `%APPDATA%\Factorio` | Steam: `C:\Program Files (x86)\Steam\steamapps\common\Factorio`, standalone: `C:\Program Files\Factorio` |
-| **macOS** | `~/Library/Application Support/factorio` | Steam: `~/Library/Application Support/Steam/steamapps/common/Factorio/factorio.app`, standalone: `/Applications/factorio.app` |
-| **Linux** | `~/.factorio` | Steam: `~/.steam/steam/steamapps/common/Factorio` |
-| **Headless / .zip / .tar.xz** | the extracted folder, e.g. `/opt/factorio` | the same folder |
-| **Docker** ([factoriotools](https://hub.docker.com/r/factoriotools/factorio)) | the host folder mounted at `/factorio` | `docker cp <container>:/opt/factorio/data ./factorio-data` |
-
-**Windows** (PowerShell; Python from python.org):
-
-```powershell
-git clone https://github.com/veekaste/factory-map.git
-cd factory-map\web
-py -m venv .venv
-.venv\Scripts\python -m pip install -r requirements.txt
-copy site.example.json site.json
-.venv\Scripts\python ..\tools\copy_locale.py "C:\Program Files (x86)\Steam\steamapps\common\Factorio"
-$env:FACTORIO_DATA="$env:APPDATA\Factorio"; .venv\Scripts\python server.py
-```
-
-In cmd.exe the last line is `set FACTORIO_DATA=%APPDATA%\Factorio` and then `.venv\Scripts\python server.py`.
-
-**macOS / Linux:**
-
-```sh
-git clone https://github.com/veekaste/factory-map.git
-cd factory-map/web
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
-cp site.example.json site.json
-.venv/bin/python ../tools/copy_locale.py "<install folder>"
-FACTORIO_DATA="$HOME/.factorio" .venv/bin/python server.py    # macOS: "$HOME/Library/Application Support/factorio"
-```
-
-Open http://127.0.0.1:8480. The map appears after the mod's first full read (about 1 tick per chunk, a few minutes on a big map) while the game runs. Re-run `copy_locale.py` after game updates.
-
-- **Dedicated server (best):** run the website next to it permanently; on Linux use the systemd user service in [`web/examples/factory-map-web.service`](web/examples/factory-map-web.service).
-- **Hosting from your PC:** the site updates only while you host and shows the last state otherwise.
-- **Rented game server:** run the website there, or sync its `script-output/factory-map/` and `mods/` to your machine (e.g. `rsync` in a loop) and point `FACTORIO_DATA` at the copy.
-
-## 3. Who can open it
+## Show it to others
 
 | Who | How |
 |---|---|
-| Only you | Nothing to do: http://127.0.0.1:8480 |
-| Home network | `WEB_BIND=0.0.0.0`, allow TCP 8480 in the firewall, open `http://<PC's LAN IP>:8480` |
-| Internet | Keep `127.0.0.1` and put nginx with HTTPS in front ([`web/examples/nginx.conf`](web/examples/nginx.conf)); forward TCP 443 on the router; a dynamic DNS name helps |
+| **People on your Wi-Fi** | In `web/site.json` set `"bind": "0.0.0.0"`, start again, and click *Allow* if the firewall asks. The window shows the address to open, like `http://192.168.1.20:8480`. |
+| **Friends anywhere, easiest** (no router settings) | Install [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/) (Windows: `winget install Cloudflare.cloudflared`, macOS: `brew install cloudflared`), then run `cloudflared tunnel --url http://localhost:8480` while the website runs. It prints an `https://….trycloudflare.com` link to share. The link changes every time you start it. |
+| **Friends anywhere, fixed address** (port forwarding) | Set `"bind": "0.0.0.0"`. In your router, forward **TCP 8480** to this PC's local address (shown in the window). Share `http://<your public IP>:8480` (find it at [whatismyip.com](https://whatismyip.com)). A free name from [DuckDNS](https://www.duckdns.org) keeps working when your IP changes. Plain HTTP, but the site is read-only. |
+| **Always-on server** | Run it as a service next to your Factorio server and put nginx with HTTPS in front: [`web/examples/`](web/examples/) has a systemd service and an nginx config. |
 
-Players still join the game on UDP 34197. The site shows player names, chat and positions to anyone who can open it (both can be turned off in the mod settings).
+The website port (8480) is separate from the game: players still join on UDP 34197. Anyone who can open the site sees player names, chat and positions; chat and positions can be turned off in the mod settings.
+
+## Dedicated and headless servers
+
+Run the website on the machine that hosts the game, the same way (`./start-mac-linux.sh`, or the systemd service). If it doesn't find the server's folder by itself, set `"factorio_data"` in `web/site.json` to the folder that contains `mods/` and `script-output/`:
+
+| Server | `factorio_data` |
+|---|---|
+| Headless `.tar.xz` | the extracted folder, e.g. `/opt/factorio` |
+| Docker ([factoriotools](https://hub.docker.com/r/factoriotools/factorio)) | the host folder mounted at `/factorio` |
+| Rented server, website at home | a local copy of its `script-output/factory-map/` and `mods/`, kept in sync (e.g. `rsync` in a loop) |
+
+For English item names on a headless server, set `"factorio_install"` to the game folder (Docker: `docker cp <container>:/opt/factorio/data ./factorio-data`, then point it there).
 
 ## Settings
 
-`web/site.json` (or env vars, which win): `server_name` (`SERVER_NAME`), `tagline` (`SERVER_TAGLINE`), `copyright` (`SITE_COPYRIGHT`), `source_url` (`SITE_SOURCE_URL`), `mod_name` (`MOD_NAME`, default `factory-map`), `timelapse_frame_hours` (default 1).
+`web/site.json` (environment variables with the same meaning win):
 
-| Env var | Default | What |
+| Key | Default | What |
 |---|---|---|
-| `FACTORIO_DATA` | `data/` in the repo folder | Folder with `mods/` and `script-output/` |
-| `FACTORIO_OUT` | `$FACTORIO_DATA/script-output/factory-map` | The mod's files, if elsewhere |
-| `WEB_BIND` / `WEB_PORT` | `127.0.0.1` / `8480` | Listen address and port |
-| `WEB_STATE` | `web/state` | Database, map tiles, history |
-| `KEEP_FULL_SNAPSHOTS` | `12` | Timelapse frames kept at full detail |
+| `server_name` | `Factorio server` | Name in the header and tab title |
+| `tagline` | empty | Small text after the name, e.g. your modpack |
+| `bind` | `127.0.0.1` | `0.0.0.0` lets other devices open it (`WEB_BIND`) |
+| `port` | `8480` | Website port (`WEB_PORT`) |
+| `factorio_data` | found automatically | Folder with `mods/` and `script-output/` (`FACTORIO_DATA`) |
+| `factorio_install` | found automatically | Game install folder, for English names (`FACTORIO_INSTALL`) |
+| `copyright`, `source_url` | empty | Footer text and a source link |
+| `timelapse_frame_hours` | `1` | One timelapse frame per this many game hours |
 
-In game, *Settings → Mod settings → Map* (admins, changeable at runtime): background re-check interval (30 min), chunks per tick for a full read (1), and switches for chat, player positions and enemy attacks. Commands: `/map-status` (anyone), and for admins `/map-refresh` (re-read the whole map), `/map-export` (write files now), `/map-bench` (time the export on your save).
+In game, *Settings → Mod settings → Map* (admins, changeable while playing): background re-check interval (30 min), chunks per tick for the first read (1), and switches for chat, player positions and enemy attacks. Commands: `/map-status` (anyone), and for admins `/map-refresh` (re-read the whole map), `/map-export` (write files now), `/map-bench` (time the export on your save).
 
-## Troubleshooting
+## Common problems
 
-| Problem | Fix |
+| What you see | Fix |
 |---|---|
-| Site works, but no map / never updates | The first read isn't done (`/map-status`), the game is paused or singleplayer, or `FACTORIO_DATA` doesn't contain `script-output/factory-map/` with changing file times. |
-| Names like `assembling-machine-2` | Run `tools/copy_locale.py` with the install folder, then restart the website. |
-| `pip` says "externally-managed-environment" | Use the venv as in the quick start. |
+| "Python is not installed" | Install it from [python.org/downloads](https://www.python.org/downloads/), then start again. |
+| Windows: "Windows protected your PC" | Click *More info* → *Run anyway*. |
+| macOS: "can't be opened because it is from an unidentified developer" | Right-click `start-mac.command` → *Open* → *Open*. Only needed the first time. |
+| Linux: "Couldn't create the Python environment" | `sudo apt install python3-venv` (Ubuntu/Debian), then start again. |
+| "Setup failed" | Usually no internet during the first start (it downloads two Python packages). Check your connection and start again. |
+| "Can't use port 8480" | The website is already running in another window, or another program uses 8480: set `"port"` in `web/site.json`. |
+| The site opens but says there's no map | Normal until someone plays: the mod only writes while a game is hosted or a server runs, not in singleplayer. Check the mod is enabled. The first full read takes a few minutes (`/map-status` shows progress). |
+| "No map data yet … Wrong folder?" in the window | The website looks in the wrong place: set `"factorio_data"` (see above). |
+| Item names like `assembling-machine-2` | Set `"factorio_install"` to your Factorio folder, then start again. |
+| Map stops changing | The game is paused (servers pause when empty). It continues when someone plays. |
+| Friends can't open it | Check `"bind": "0.0.0.0"`, the firewall and the port forward, and test from a phone on mobile data, not your Wi-Fi. If your internet provider doesn't give you a public IP, port forwarding can't work: use the cloudflared link. |
+| "Mod mismatch" when joining | Use *Sync mods with server* in the multiplayer menu. |
+
+Advanced: `web/requirements.txt` lists the Python packages if you set things up yourself; `build.sh` builds the mod zip from `mod/factory-map`.
 
 Third-party code is listed in [THIRD_PARTY.md](THIRD_PARTY.md).

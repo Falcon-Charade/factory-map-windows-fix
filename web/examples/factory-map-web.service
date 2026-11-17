@@ -1,4 +1,5 @@
 # systemd user service. Install:
+#   first run ./start-mac-linux.sh once (sets up web/.venv), stop it with Ctrl+C
 #   mkdir -p ~/.config/systemd/user && cp factory-map-web.service ~/.config/systemd/user/
 #   edit the paths below, then:
 #   systemctl --user daemon-reload && systemctl --user enable --now factory-map-web
